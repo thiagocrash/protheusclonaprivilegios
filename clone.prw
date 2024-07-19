@@ -25,6 +25,8 @@ static function AddPrivilegeToAllUsers(cCod as character,cOwner as character)
 		if nErro > 0
 			alert("Disarmando a transação. Erros: " + cValToChar(nErro))
 			DisarmTransaction()
+		else
+			FWAlertSucess("Privilégios adicionados!")
 		endif
 
 	End Transaction
@@ -52,17 +54,19 @@ static function AddPvl(cUser,cCod,cOwner) as numeric
 	local cNome := GetPvlName(cCod)
 	local cQuery := ""
 
-	if !Empty(cNome)
-		cQuery += "insert into sys_rules_usr_rules "
-		cQuery += "(user_id,usr_rl_id,usr_rl_codigo,usr_rl_owner) "
-		cQuery += "values "
-		cQuery += "('"+cUser+"','"+cCod+"','"+cNome+"',"+cOwner+")"
-		if TCSQLExec(cQuery) < 0
-			alert('Erro no clone' + TcSqlError())
-			nErro += 1
+	if !UserHasPvl(cUser,cCod)
+		if !Empty(cNome)
+			cQuery += "insert into sys_rules_usr_rules "
+			cQuery += "(user_id,usr_rl_id,usr_rl_codigo,usr_rl_owner) "
+			cQuery += "values "
+			cQuery += "('"+cUser+"','"+cCod+"','"+cNome+"',"+cOwner+")"
+			if TCSQLExec(cQuery) < 0
+				alert('Erro no clone' + TcSqlError())
+				nErro += 1
+			endif
+		else
+			nErro+=1
 		endif
-    else
-        nErro+=1
 	endif
 return nErro
 
@@ -77,3 +81,18 @@ static function GetPvlName(cCod as character) as character
 	cName = CODNAME->RL__CODIGO
 	CODNAME->(DBCloseArea())
 return AllTrim(cName)
+
+static function UserHasPvl(cUser as character, cCod as character) as logical
+	local lRet := .F.
+
+	beginsql alias "USERCODE"
+		SELECT R_E_C_N_O_ from SYS_RULES_USR_RULES WHERE USER_ID = %Exp:cUser% AND USR_RL_ID = %Exp:cCod% AND R_E_C_D_E_L_ = 0
+	endsql
+
+	if !Empty(USERCODE->R_E_C_N_O_)
+		lRet := .T.
+	endif
+
+	USERCODE->(DBCloseArea())
+
+return lRet
