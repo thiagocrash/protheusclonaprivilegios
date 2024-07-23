@@ -1,7 +1,23 @@
 #include 'protheus.ch'
 
-user function ENTRY()
-	AddPrivilegeToAllUsers('000001','2')
+user function RotinaClonaPvl()
+	local aArea := GetArea()
+	local aPergs := {}
+	local cNum := "999999"
+	local cOwner := "2"
+
+	aAdd(aPergs,{1,"Número",cNum,"",".T.","",".T.",80,.T.})
+	aAdd(aPergs,{1,"Owner",cOwner,"",".T.","",".T.",80,.T.})
+
+	if ParamBox(aPergs,"Informe os paramêtros",,,,,,,,,.F.,.F.)
+		if Len(cNum) == Len(AllTrim(MV_PAR01))
+			AddPrivilegeToAllUsers(MV_PAR01,MV_PAR02)
+		else
+			alert("Paramêtros de tamanho incorreto")
+		endif
+	endif
+
+	RestArea(aArea)
 return nil
 
 /*/{Protheus.doc} AddPrivilegeToAllUsers
